@@ -1,6 +1,6 @@
 #based on https://github.com/giannisigalotti/HomeAssistant/blob/main/blueprints/motion-activated-light.yaml
 blueprint:
-  name: Motion-activated Light brightness
+  name: Motion-activated Light outdoor brightness
   description: Turn on a light when a movement occurs
   domain: automation
   source_url: https://github.com/hebbister/blueprints/blob/main/motion-activated-outdoor-brightness.yaml
