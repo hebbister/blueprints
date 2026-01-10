@@ -10,6 +10,7 @@ blueprint:
       description: |
         External brightness sensor or number entity (0–100).
         Automation runs only if brightness is below threshold.
+        If you do not select an entity, it won't be taken into account.
       selector:
         entity:
           domain:
