@@ -171,15 +171,7 @@ variables:
   use_weather: !input wheater_handling
   skip_light_on: !input skip_if_light_is_on
   target_lights: !input light_target
-  force_skip:
-    "{{ skip_light_on and\n    (expand(\n              (([] if target_lights.device_id
-    is undefined\n              else target_lights.device_id | device_entities\n              if
-    target_lights.device_id is string\n              else target_lights.device_id
-    | map('device_entities') | sum(start=[]) )\n              +\n              ([]
-    if target_lights.entity_id is undefined\n              else [target_lights.entity_id]\n
-    \             if target_lights.entity_id is string\n              else target_lights.entity_id
-    ))\n             | select('search', '^light\\.') | list\n          ) | selectattr('state',
-    'eq', 'on') | list | length  > 0)\n}}\n"
+
   sun_rising:
     "{% if (states.sun.sun.state == \"above_horizon\") %}\n    {{ states.sun.sun.last_changed
     }}\n{%- else -%}\n    {{ states.sun.sun.attributes.next_rising }}\n{%- endif %}\n"
@@ -198,6 +190,70 @@ variables:
     {% else %}
       {{ states(brightness_sensor) | float(0) > brightness_limit }}
     {% endif %}
+    second_target_lights: !input second_light_target
+
+  night_light_target: >
+    {{
+      second_target_lights
+      if second_target_lights.entity_id is defined
+         or second_target_lights.device_id is defined
+      else target_lights
+    }}
+
+  is_night: >
+    {{
+      as_timestamp(now()) >=
+        (as_timestamp(sun_dusk) - dusk_start_hour*3600 - dusk_start_minute*60)
+      and
+      as_timestamp(now()) <
+        (as_timestamp(sun_rising) + rising_start_hour*3600 + rising_start_minute*60)
+    }}
+
+  effective_light_target: >
+    {{
+      night_light_target if is_night else target_lights
+    }}
+
+  all_light_entities: >
+    {{
+      expand(
+        (
+          ([] if target_lights.device_id is undefined
+           else target_lights.device_id | device_entities
+           if target_lights.device_id is string
+           else target_lights.device_id | map('device_entities') | sum(start=[]))
+          +
+          ([] if target_lights.entity_id is undefined
+           else [target_lights.entity_id]
+           if target_lights.entity_id is string
+           else target_lights.entity_id)
+          +
+          ([] if second_target_lights.device_id is undefined
+           else second_target_lights.device_id | device_entities
+           if second_target_lights.device_id is string
+           else second_target_lights.device_id | map('device_entities') | sum(start=[]))
+          +
+          ([] if second_target_lights.entity_id is undefined
+           else [second_target_lights.entity_id]
+           if second_target_lights.entity_id is string
+           else second_target_lights.entity_id)
+        )
+        | select('search', '^light\.')
+        | unique
+        | list
+      )
+    }}
+
+  force_skip: >
+    {{
+      skip_light_on and
+      (
+        all_light_entities
+        | selectattr('state', 'eq', 'on')
+        | list
+        | length > 0
+      )
+    }}
 
 condition:
   - condition: and
@@ -220,7 +276,7 @@ condition:
                 + rising_start_minute*60) )}}"
 action:
   - service: light.turn_on
-    target: !input light_target
+    target: "{{ effective_light_target }}"
   - wait_for_trigger:
       platform: state
       entity_id: !input motion_entity
@@ -233,4 +289,4 @@ action:
       milliseconds: 0
   - delay: !input no_motion_wait
   - service: light.turn_off
-    target: !input light_target
+    target: "{{ all_light_entities | map(attribute='entity_id') | list }}"
