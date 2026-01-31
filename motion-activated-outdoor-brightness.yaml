@@ -47,6 +47,13 @@ blueprint:
           entity:
             - domain:
                 - light
+    second_light_target:
+      name: Light
+      selector:
+        target:
+          entity:
+            - domain:
+                - light
     no_motion_wait:
       name: Wait time
       description:
@@ -171,7 +178,7 @@ variables:
   use_weather: !input wheater_handling
   skip_light_on: !input skip_if_light_is_on
   target_lights: !input light_target
-
+  second_target_lights: !input second_light_target
   sun_rising:
     "{% if (states.sun.sun.state == \"above_horizon\") %}\n    {{ states.sun.sun.last_changed
     }}\n{%- else -%}\n    {{ states.sun.sun.attributes.next_rising }}\n{%- endif %}\n"
