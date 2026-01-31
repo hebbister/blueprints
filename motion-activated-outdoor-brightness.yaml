@@ -199,7 +199,8 @@ variables:
     {% else %}
       {{ states(brightness_sensor) | float(0) > brightness_limit }}
     {% endif %}
-    second_target_lights: !input second_light_target
+
+  second_target_lights: !input second_light_target
 
   night_light_target: >
     {{
