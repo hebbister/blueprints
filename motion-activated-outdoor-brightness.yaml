@@ -178,7 +178,17 @@ variables:
   use_weather: !input wheater_handling
   skip_light_on: !input skip_if_light_is_on
   target_lights: !input light_target
-  second_target_lights: !input second_light_target
+  night_target_lights: !input second_light_target
+  second_target_lights: >
+    {{
+      night_target_lights
+      if night_target_lights is defined
+         and (
+           night_target_lights.entity_id is defined
+           or night_target_lights.device_id is defined
+         )
+      else target_lights
+    }}
   force_skip: >
     {{
       skip_light_on and
