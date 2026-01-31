@@ -159,13 +159,13 @@ blueprint:
       default: 0
     timeout:
       name: "Deactivation timeout?"
-      description: "After how many minutes does the switch turn off automatically (-1 if no timeout)"
+      description: "After how many minutes does the switch turn off automatically"
       selector:
         number:
           min: -1
           max: 60
           unit_of_measurement: minutes
-      default: -1
+      default: 60
 mode: restart
 max_exceeded: silent
 trigger:
@@ -298,6 +298,5 @@ action:
   - delay: !input no_motion_wait
   - service: light.turn_off
     target: "{{ target_lights }}"
-
   - service: light.turn_off
     target: "{{ night_light_target }}"
