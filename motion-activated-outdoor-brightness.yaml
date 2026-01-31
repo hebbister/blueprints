@@ -275,6 +275,8 @@ action:
             - dusk_start_minute*60) )}}"
           - "{{ as_timestamp(now()) < ((as_timestamp(sun_rising) + rising_start_hour*3600
             + rising_start_minute*60) )}}"
+          - "{{ second_light_target.entity_id is defined
+            or second_light_target.device_id is defined }}"
     then:
       - service: light.turn_on
         target: !input second_light_target
