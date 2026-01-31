@@ -48,7 +48,7 @@ blueprint:
             - domain:
                 - light
     second_light_target:
-      name: Light
+      name: Light at night
       selector:
         target:
           entity:
