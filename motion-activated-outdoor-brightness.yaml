@@ -297,6 +297,4 @@ action:
       milliseconds: 0
   - delay: !input no_motion_wait
   - service: light.turn_off
-    target: light_target
-  - service: light.turn_off
-    target: night_light_target
+    target: "{{ all_light_entities | map(attribute='entity_id') | list }}"
