@@ -102,7 +102,7 @@ blueprint:
             - weather
           multiple: false
           reorder: false
-      default: weather.home
+      default: weather.forecast_home
     sunset_start_hh:
       name: Pre-sunset hours activation
       description:
