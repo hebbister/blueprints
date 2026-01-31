@@ -297,6 +297,6 @@ action:
       milliseconds: 0
   - delay: !input no_motion_wait
   - service: light.turn_off
-    target:
-      - light_target
-      - effective_light_target
+    target: light_target
+  - service: light.turn_off
+    target: effective_light_target
