@@ -48,7 +48,9 @@ blueprint:
             - domain:
                 - light
     second_light_target:
-      name: Light
+      name: Light at night
+      description: Optional. If not set, the main Light will be used.
+      optional: true
       selector:
         target:
           entity:
