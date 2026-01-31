@@ -178,15 +178,47 @@ variables:
   use_weather: !input wheater_handling
   skip_light_on: !input skip_if_light_is_on
   target_lights: !input light_target
-  force_skip:
-    "{{ skip_light_on and\n    (expand(\n              (([] if target_lights.device_id
-    is undefined\n              else target_lights.device_id | device_entities\n              if
-    target_lights.device_id is string\n              else target_lights.device_id
-    | map('device_entities') | sum(start=[]) )\n              +\n              ([]
-    if target_lights.entity_id is undefined\n              else [target_lights.entity_id]\n
-    \             if target_lights.entity_id is string\n              else target_lights.entity_id
-    ))\n             | select('search', '^light\\.') | list\n          ) | selectattr('state',
-    'eq', 'on') | list | length  > 0)\n}}\n"
+  second_target_lights: !input second_light_target
+  force_skip: >
+    {{
+      skip_light_on and
+      (
+        expand(
+          (
+            # target_lights
+            (
+              ([] if target_lights.device_id is undefined
+              else target_lights.device_id | device_entities
+              if target_lights.device_id is string
+              else target_lights.device_id | map('device_entities') | sum(start=[]))
+              +
+              ([] if target_lights.entity_id is undefined
+              else [target_lights.entity_id]
+              if target_lights.entity_id is string
+              else target_lights.entity_id)
+            )
+            +
+            # second_target_lights
+            (
+              ([] if second_target_lights.device_id is undefined
+              else second_target_lights.device_id | device_entities
+              if second_target_lights.device_id is string
+              else second_target_lights.device_id | map('device_entities') | sum(start=[]))
+              +
+              ([] if second_target_lights.entity_id is undefined
+              else [second_target_lights.entity_id]
+              if second_target_lights.entity_id is string
+              else second_target_lights.entity_id)
+            )
+          )
+          | select('search', '^light\.') | list
+        )
+        | selectattr('state', 'eq', 'on')
+        | list
+        | length > 0
+      )
+    }}
+
   sun_rising:
     "{% if (states.sun.sun.state == \"above_horizon\") %}\n    {{ states.sun.sun.last_changed
     }}\n{%- else -%}\n    {{ states.sun.sun.attributes.next_rising }}\n{%- endif %}\n"
